@@ -21,7 +21,7 @@ const CartScreen=()=>{
         }
         getAllItems();
 
-        
+        return ()=> getAllItems();
     },[]);
 
     const handleCartClear=async()=>{

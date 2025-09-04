@@ -1,5 +1,5 @@
-import React,{useEffect,useState} from 'react';
-import { Button, Text, View, StyleSheet,TouchableOpacity,Image, ScrollView } from 'react-native';
+import React,{useEffect,useState,useCallback} from 'react';
+import { Button, Text, View, StyleSheet,TouchableOpacity,Image, ScrollView,FlatList } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
 function HomeScreen({  }) {
@@ -14,6 +14,8 @@ function HomeScreen({  }) {
 
    useEffect(()=>{
     
+    const fetchData=()=>{
+        
     fetch("https://fakestoreapi.in/api/products/category?type=gaming")
        .then(res => res.json())
        .then(res => setGaming(res.products.slice(0,10)));
@@ -30,7 +32,11 @@ function HomeScreen({  }) {
        .then(res => res.json())
        .then(res => setlaptop(res.products.slice(0,10)))
 
-       return ()=> {};
+    };
+
+    fetchData();
+
+       return ()=> {fetchData};
         // .then(res => console.log(res))
    },[])
 
@@ -45,18 +51,12 @@ function HomeScreen({  }) {
 
    }
 
-   const Products=({title,product})=>{
+   const Products= React.memo(({title,product})=>{
 
+    const ItemToRender=({item})=>{
 
-    return(
-        <View style={styles.containerSub}>    
-      <Text style={styles.title}>{title}</Text>
-      <ScrollView 
-      style={styles.containerScroll}
-      horizontal
-      showsHorizontalScrollIndicator={false}>
-      {product && product.map((item,index)=>(
-        <View 
+        return(
+            <View 
         key={item.id} 
         style={styles.items}>
             <TouchableOpacity onPress={()=>handleClickItem(item)}>
@@ -71,13 +71,27 @@ function HomeScreen({  }) {
                  <Text style={styles.textName}>{item.title}</Text>
             </TouchableOpacity>
         </View>
-      ))}
-      </ScrollView>
+        );
+    }
+
+    return(
+        <View style={styles.containerSub}>    
+      <Text style={styles.title}>{title}</Text>
+
+      <FlatList
+        horizontal={true}
+        data={product}
+        renderItem={({ item }) => <ItemToRender item={item} />}
+        keyExtractor={(item) => item.id}
+      />
+      
       </View>
 
     );
 
-   }
+   });
+
+   
 
   return (
     <View style={styles.container}>
@@ -88,7 +102,7 @@ function HomeScreen({  }) {
      cart
      </TouchableOpacity>   
 
-     <ScrollView>
+     <ScrollView style={styles.verticalScroll}>
 
       <Products title={'Televison'} product={tv}/>
       <Products title={'Mobile'} product={mobile}/>
@@ -116,8 +130,17 @@ const styles = StyleSheet.create({
         borderRadius:10
         
     },
-    containerScroll: {
+    verticalScroll: {
         flex: 1,
+        // height:300,
+        // alignItems: 'center',
+        // justifyContent: 'center',
+        // padding: 6,
+        backgroundColor: '#fff',
+      },  
+    containerScroll: {
+        // flex: 1,
+        height:300,
         // alignItems: 'center',
         // justifyContent: 'center',
         padding: 6,
